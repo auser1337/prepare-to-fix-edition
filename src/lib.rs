@@ -140,11 +140,13 @@ extern "system" fn main(_: *mut c_void) -> u32 {
         .expect("Failed to set global default `tracing` subscriber");
 
     panic::set_hook(Box::new(|panic_info| {
-        error!("Panic occurred: {panic_info}");
+        error!("{panic_info}");
     }));
 
-    let config_bytes = fs::read("config.toml").expect("Failed to read `config.toml`");
-    let config: Config = toml::from_slice(&config_bytes).expect("Failed to parse `config.toml`");
+    let config_bytes = fs::read("prepare-to-fix-edition.toml")
+        .expect("Failed to read `prepare-to-fix-edition.toml`");
+    let config: Config =
+        toml::from_slice(&config_bytes).expect("Failed to parse `prepare-to-fix-edition.toml`");
     info!("FPS cap: {}", config.fps_cap);
 
     unsafe {
