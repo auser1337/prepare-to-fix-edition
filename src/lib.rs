@@ -166,31 +166,25 @@ extern "system" fn main(_: *mut c_void) -> u32 {
         memory::protect_rw(offsets::FPS_11E7CE0, size_of::<f64>()).unwrap();
     }
 
-    {
-        let original = unsafe { MinHook::create_hook(offsets::UPDATE as _, update_hook as _) }
-            .expect("Failed to hook `Update`");
-        info!("Hooked `Update`!");
+    let original = unsafe { MinHook::create_hook(offsets::UPDATE as _, update_hook as _) }
+        .expect("Failed to hook `Update`");
+    info!("Hooked `Update`!");
 
-        ORIGINAL_UPDATE.get_or_init(|| unsafe { mem::transmute(original) });
-    }
+    ORIGINAL_UPDATE.get_or_init(|| unsafe { mem::transmute(original) });
 
-    {
-        unsafe { MinHook::create_hook(offsets::SLEEP as _, sleep_hook as _) }
-            .expect("Failed to hook `Sleep`");
-        info!("Hooked `sleep`!");
-    }
+    unsafe { MinHook::create_hook(offsets::SLEEP as _, sleep_hook as _) }
+        .expect("Failed to hook `Sleep`");
+    info!("Hooked `sleep`!");
 
-    {
-        let d3d = unsafe { Direct3DCreate9(D3D_SDK_VERSION) }.expect("Direct3DCreate9 failed");
-        let vtable = unsafe { *(d3d.as_raw() as *const *const *const c_void) };
-        let create_device = unsafe { *vtable.add(16) };
+    let d3d = unsafe { Direct3DCreate9(D3D_SDK_VERSION) }.expect("Direct3DCreate9 failed");
+    let vtable = unsafe { *(d3d.as_raw() as *const *const *const c_void) };
+    let create_device = unsafe { *vtable.add(16) };
 
-        let original = unsafe { MinHook::create_hook(create_device as _, create_device_hook as _) }
-            .expect("Failed to hook `IDirect3D9::CreateDevice`");
-        info!("Hooked `IDirect3D9::CreateDevice`!");
+    let original = unsafe { MinHook::create_hook(create_device as _, create_device_hook as _) }
+        .expect("Failed to hook `IDirect3D9::CreateDevice`");
+    info!("Hooked `IDirect3D9::CreateDevice`!");
 
-        ORIGINAL_CREATE_DEVICE.get_or_init(|| unsafe { mem::transmute(original) });
-    }
+    ORIGINAL_CREATE_DEVICE.get_or_init(|| unsafe { mem::transmute(original) });
 
     unsafe { MinHook::enable_all_hooks() }.expect("Failed to enable all hooks");
     info!("Enabled all hooks!");
